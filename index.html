@@ -5,261 +5,321 @@
   <title>Schematizer Pro</title>
   <style>
     :root {
-      --bg-color: #f3f4f6;
-      --sidebar-bg: #ffffff;
-      --panel-bg: #ffffff;
-      --accent: #3b82f6;
-      --accent-hover: #2563eb;
-      --text-main: #1f2937;
-      --text-muted: #6b7280;
-      --border: #e5e7eb;
-      --code-bg: #1e1e1e;
+      --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0;
+      --accent: #2563eb; --accent-hover: #1d4ed8;
+      --text: #1e293b; --text-muted: #64748b;
+      --code-bg: #0f172a; --code-text: #38bdf8;
     }
     
-    body {
-      margin: 0;
-      display: flex;
-      height: 100vh;
-      font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-main);
-    }
-
-    /* Современный сайдбар */
-    #sidebar {
-      width: 250px;
-      background: var(--sidebar-bg);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      box-shadow: 2px 0 10px rgba(0,0,0,0.02);
-      z-index: 10;
-    }
-
-    .sidebar-header {
-      padding: 20px;
-      border-bottom: 1px solid var(--border);
-      font-weight: 700;
-      font-size: 18px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .menu-item {
-      padding: 12px 20px;
-      cursor: pointer;
-      border-left: 3px solid transparent;
-      transition: all 0.2s;
-      font-size: 14px;
-    }
-
-    .menu-item:hover, .menu-item.active {
-      background: #f0fdf4;
-      border-left-color: #10b981;
-      color: #047857;
-      font-weight: 600;
-    }
-
-    /* Основная рабочая область */
-    #main-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    /* Верхняя панель управления (ИИ) */
-    .topbar {
-      padding: 15px 20px;
-      background: var(--panel-bg);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      gap: 15px;
-      align-items: center;
-    }
-
-    .ai-input-group {
-      flex: 1;
-      display: flex;
-      gap: 10px;
-    }
-
-    input[type="text"], select {
-      width: 100%;
-      padding: 10px 15px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 14px;
-      outline: none;
-      transition: border 0.2s;
-    }
-
-    input[type="text"]:focus {
-      border-color: var(--accent);
-    }
-
-    button {
-      padding: 10px 20px;
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: background 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
+    * { box-sizing: border-box; }
+    body { margin: 0; display: flex; height: 100vh; font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
+    
+    /* Сайдбар: Проекты и Пул свойств */
+    #sidebar { width: 300px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 10; }
+    .sidebar-section { padding: 15px; border-bottom: 1px solid var(--border); }
+    h3 { margin: 0 0 10px 0; font-size: 13px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
+    
+    .project-item { padding: 8px 12px; margin-bottom: 5px; border-radius: 6px; cursor: pointer; font-size: 14px; border: 1px solid transparent; }
+    .project-item.active { background: #eff6ff; border-color: #bfdbfe; color: var(--accent); font-weight: bold; }
+    
+    input[type="text"], textarea { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; margin-bottom: 8px; outline: none; transition: border 0.2s; }
+    input[type="text"]:focus { border-color: var(--accent); }
+    
+    button { padding: 8px 16px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background 0.2s; }
     button:hover { background: var(--accent-hover); }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-outline:hover { background: #f1f5f9; }
 
-    /* Двойная панель: Конструктор и Результат */
-    .workspace {
-      display: flex;
-      flex: 1;
-      overflow: hidden;
-    }
+    /* Drag & Drop Пул */
+    .drag-pool { display: flex; flex-wrap: wrap; gap: 6px; max-height: 250px; overflow-y: auto; }
+    .drag-item { background: #f1f5f9; border: 1px dashed #94a3b8; padding: 6px 10px; border-radius: 4px; font-size: 12px; cursor: grab; user-select: none; transition: transform 0.1s; }
+    .drag-item:active { cursor: grabbing; transform: scale(0.95); }
 
-    /* Зона Drag and Drop (Конструктор) */
-    .constructor-panel {
-      flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-      display: flex;
-      gap: 20px;
-    }
+    /* Центральная зона: ИИ и Конструктор */
+    #main { flex: 1; display: flex; flex-direction: column; }
+    .ai-bar { padding: 15px 20px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; gap: 10px; align-items: center; }
+    .ai-bar input { margin: 0; flex: 1; padding: 12px 15px; font-size: 14px; border-color: #a7f3d0; background: #f0fdf4; }
+    .ai-bar input:focus { border-color: #10b981; }
+    .btn-ai { background: #10b981; } .btn-ai:hover { background: #059669; }
 
-    .properties-list {
-      width: 200px;
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px;
-    }
+    #constructor-area { flex: 1; padding: 20px; overflow-y: auto; }
+    .drop-zone { min-height: 400px; background: var(--bg); border: 2px dashed #cbd5e1; border-radius: 12px; padding: 20px; transition: background 0.2s; }
+    .drop-zone.dragover { background: #e2e8f0; border-color: var(--accent); }
+    
+    /* Динамические поля */
+    .field-row { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 5px; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .field-header { display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; color: var(--accent); }
+    .field-actions { display: flex; gap: 5px; }
+    .btn-icon { background: transparent; color: var(--text-muted); border: none; padding: 2px 5px; font-size: 11px; cursor: pointer; border-radius: 4px; }
+    .btn-icon:hover { background: #e2e8f0; color: #ef4444; }
+    .btn-insert { background: #f1f5f9; color: var(--accent); border: 1px solid #e2e8f0; }
 
-    .draggable-prop {
-      padding: 8px;
-      background: white;
-      border: 1px dashed #cbd5e1;
-      border-radius: 4px;
-      margin-bottom: 8px;
-      cursor: grab;
-      font-size: 13px;
-    }
+    /* Правая панель: Код */
+    #code-panel { width: 35%; background: var(--code-bg); display: flex; flex-direction: column; border-left: 1px solid #1e293b; }
+    .code-header { padding: 15px; background: #0f172a; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center; }
+    pre { margin: 0; padding: 20px; color: var(--code-text); font-family: 'Consolas', monospace; font-size: 13px; overflow: auto; flex: 1; white-space: pre-wrap; }
 
-    .drop-zone {
-      flex: 1;
-      background: white;
-      border: 2px dashed #94a3b8;
-      border-radius: 12px;
-      padding: 20px;
-      min-height: 300px;
-    }
-
-    /* Панель Кода */
-    .code-panel {
-      width: 40%;
-      background: var(--code-bg);
-      color: #d4d4d4;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-    }
-
-    .code-header {
-      padding: 10px 20px;
-      background: #2d2d2d;
-      border-bottom: 1px solid #404040;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 12px;
-      color: #9cdcfe;
-    }
-
-    .btn-copy {
-      background: #4b5563;
-      padding: 6px 12px;
-      font-size: 12px;
-    }
-
-    .btn-copy:hover { background: #6b7280; }
-
-    pre {
-      margin: 0;
-      padding: 20px;
-      overflow: auto;
-      font-family: 'Consolas', monospace;
-      font-size: 13px;
-      flex: 1;
-    }
+    /* Модалки и лоадеры */
+    .loader { border: 2px solid #f3f3f3; border-top: 2px solid white; border-radius: 50%; width: 14px; height: 14px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 5px; display: none; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
 
   <div id="sidebar">
-    <div class="sidebar-header">
-      Schematizer
-      <span style="font-size: 12px; color: var(--text-muted); cursor: pointer;" title="Настройки">⚙️</span>
+    <div class="sidebar-section" style="background: #f8fafc; display: flex; justify-content: space-between; align-items: center;">
+      <h2 style="margin: 0; font-size: 16px; color: var(--accent);">Schematizer</h2>
+      <button class="btn-outline" style="padding: 4px 8px; font-size: 12px;" onclick="openSettings()">⚙️ API</button>
     </div>
-    <div style="padding: 15px 20px; font-size: 12px; color: var(--text-muted); text-transform: uppercase;">Проекты</div>
-    <div class="menu-item active">📁 Главный сайт</div>
-    <div class="menu-item">📁 Блог компании</div>
-    <div class="menu-item" style="color: var(--accent);">+ Добавить проект</div>
+
+    <div class="sidebar-section">
+      <h3>Проекты</h3>
+      <div id="project-list"></div>
+      <div style="display: flex; gap: 5px; margin-top: 10px;">
+        <input type="text" id="new-project-name" placeholder="Новый проект" style="margin:0;">
+        <button onclick="addProject()">+</button>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <h3>Константы проекта</h3>
+      <input type="text" id="const-author" placeholder="Автор (Person)" onchange="saveConstants()">
+      <input type="text" id="const-org" placeholder="Организация (Название)" onchange="saveConstants()">
+      <input type="text" id="const-phone" placeholder="Телефон" onchange="saveConstants()">
+      <input type="text" id="const-address" placeholder="Адрес (Строка)" onchange="saveConstants()">
+    </div>
+
+    <div class="sidebar-section" style="flex: 1; overflow: hidden; display: flex; flex-direction: column;">
+      <h3>Пул свойств (Drag & Drop)</h3>
+      <div class="drag-pool">
+        <div class="drag-item" draggable="true" ondragstart="drag(event)" data-prop="@type">@type (Тип)</div>
+        <div class="drag-item" draggable="true" ondragstart="drag(event)" data-prop="name">name</div>
+        <div class="drag-item" draggable="true" ondragstart="drag(event)" data-prop="description">description</div>
+        <div class="drag-item" draggable="true" ondragstart="drag(event)" data-prop="image">image</div>
+        <div class="drag-item" draggable="true" ondragstart="drag(event)" data-prop="author">author</div>
+        <div class="drag-item" draggable="true" ondragstart="drag(event)" data-prop="publisher">publisher</div>
+        <div class="drag-item" draggable="true" ondragstart="drag(event)" data-prop="price">price</div>
+        <div class="drag-item" draggable="true" ondragstart="drag(event)" data-prop="priceCurrency">priceCurrency</div>
+        <div class="drag-item" draggable="true" ondragstart="drag(event)" data-prop="aggregateRating">aggregateRating</div>
+        <div class="drag-item" draggable="true" ondragstart="drag(event)" data-prop="telephone">telephone</div>
+        <div class="drag-item" draggable="true" ondragstart="drag(event)" data-prop="address">address</div>
+      </div>
+    </div>
   </div>
 
-  <div id="main-content">
-    
-    <div class="topbar">
-      <div class="ai-input-group">
-        <input type="text" placeholder="✨ Опиши страницу, и ИИ сам соберет все свойства...">
-        <button style="background: #10b981;">Сгенерировать</button>
-      </div>
-      <select style="width: 200px;">
-        <option>Article</option>
-        <option>Product</option>
-        <option>LocalBusiness</option>
-      </select>
+  <div id="main">
+    <div class="ai-bar">
+      <span style="font-size: 18px;">✨</span>
+      <input type="text" id="ai-input" placeholder="Опиши контент (напр. 'Статья про ремонт авто от Ивана, дата сегодня')">
+      <button class="btn-ai" id="ai-btn" onclick="generateWithAI()">
+        <span class="loader" id="ai-loader"></span> Собрать через ИИ
+      </button>
+      <button class="btn-outline" onclick="clearForm()" title="Очистить всё">🗑️</button>
     </div>
 
-    <div class="workspace">
-      <div class="constructor-panel">
-        <div class="properties-list">
-          <div style="font-size: 12px; font-weight: bold; margin-bottom: 10px; color: var(--text-muted);">Доступные свойства</div>
-          <div class="draggable-prop" draggable="true">description</div>
-          <div class="draggable-prop" draggable="true">image</div>
-          <div class="draggable-prop" draggable="true">aggregateRating</div>
-          <div class="draggable-prop" draggable="true">offers</div>
+    <div id="constructor-area">
+      <div class="drop-zone" id="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)">
+        <div id="empty-state" style="text-align: center; color: var(--text-muted); margin-top: 100px;">
+          <h3>Конструктор пуст</h3>
+          <p>Перетащи сюда блоки из пула свойств слева<br>или используй ИИ-помощника сверху.</p>
         </div>
-        
-        <div class="drop-zone">
-          <h3 style="margin-top: 0; color: #475569;">Конструктор свойств</h3>
-          <p style="color: var(--text-muted); font-size: 14px;">Перетащите свойства сюда или воспользуйтесь ИИ для автозаполнения.</p>
-          </div>
-      </div>
-
-      <div class="code-panel">
-        <div class="code-header">
-          <span>JSON-LD Output</span>
-          <button class="btn-copy" onclick="copyJSON()">📋 Копировать</button>
-        </div>
-        <pre id="json-output">{
-  "@context": "https://schema.org",
-  "@type": "Article"
-}</pre>
+        <div id="form-fields"></div>
       </div>
     </div>
+  </div>
+
+  <div id="code-panel">
+    <div class="code-header">
+      <span style="color: white; font-weight: bold; font-size: 14px;">JSON-LD Preview</span>
+      <button onclick="copyJSON()" style="background: #334155; padding: 6px 12px;">📋 Копировать</button>
+    </div>
+    <pre id="json-output"></pre>
   </div>
 
   <script>
-    function copyJSON() {
-      const code = document.getElementById('json-output').innerText;
-      navigator.clipboard.writeText(code).then(() => {
-        alert('Успешно скопировано в буфер обмена!');
-      });
+    const { ipcRenderer } = require('electron');
+    
+    // Глобальный стейт текущей разметки
+    let currentSchema = { "@context": "https://schema.org", "@type": "" };
+    let activeProjectId = null;
+    let projectsData = [];
+
+    // --- DRAG AND DROP ---
+    function allowDrop(ev) { ev.preventDefault(); }
+    function dragEnter(ev) { document.getElementById('drop-zone').classList.add('dragover'); }
+    function dragLeave(ev) { document.getElementById('drop-zone').classList.remove('dragover'); }
+    function drag(ev) { ev.dataTransfer.setData("text/plain", ev.target.getAttribute('data-prop')); }
+    
+    function drop(ev) {
+      ev.preventDefault();
+      document.getElementById('drop-zone').classList.remove('dragover');
+      const prop = ev.dataTransfer.getData("text/plain");
+      if (prop && currentSchema[prop] === undefined) {
+        currentSchema[prop] = ""; // Добавляем свойство в стейт
+        renderForm();
+      }
     }
+
+    // --- РЕНДЕР ИНТЕРФЕЙСА КОНСТРУКТОРА ---
+    function renderForm() {
+      const container = document.getElementById('form-fields');
+      const emptyState = document.getElementById('empty-state');
+      container.innerHTML = '';
+      
+      const keys = Object.keys(currentSchema).filter(k => k !== '@context');
+      
+      if (keys.length === 0) {
+        emptyState.style.display = 'block';
+      } else {
+        emptyState.style.display = 'none';
+        
+        keys.forEach(key => {
+          // Создаем визуальный блок для каждого свойства
+          const row = document.createElement('div');
+          row.className = 'field-row';
+          
+          let actionButtons = `
+            <button class="btn-icon btn-insert" onclick="insertConstant('${key}', 'const-author')" title="Вставить Автора">👤</button>
+            <button class="btn-icon btn-insert" onclick="insertConstant('${key}', 'const-org')" title="Вставить Организацию">🏢</button>
+            <button class="btn-icon" onclick="removeField('${key}')" title="Удалить свойство">✕</button>
+          `;
+
+          row.innerHTML = `
+            <div class="field-header">
+              <span>${key}</span>
+              <div class="field-actions">${actionButtons}</div>
+            </div>
+            <textarea rows="1" oninput="updateField('${key}', this.value)" placeholder="Введите значение или JSON...">${typeof currentSchema[key] === 'object' ? JSON.stringify(currentSchema[key], null, 2) : currentSchema[key]}</textarea>
+          `;
+          container.appendChild(row);
+        });
+      }
+      updateOutput();
+    }
+
+    function updateField(key, value) {
+      // Пытаемся распарсить JSON, если юзер вставил вложенный объект
+      try {
+        currentSchema[key] = JSON.parse(value);
+      } catch (e) {
+        currentSchema[key] = value;
+      }
+      updateOutput();
+    }
+
+    function removeField(key) {
+      delete currentSchema[key];
+      renderForm();
+    }
+
+    function clearForm() {
+      currentSchema = { "@context": "https://schema.org" };
+      renderForm();
+    }
+
+    // --- РАБОТА С КОНСТАНТАМИ ПРОЕКТОВ ---
+    function insertConstant(key, constId) {
+      const val = document.getElementById(constId).value;
+      if (!val) { alert("Константа пуста! Заполни её слева."); return; }
+      
+      // Умная обертка: если вставляем автора в author, делаем объект Person
+      if (key === 'author' || key === 'publisher') {
+        currentSchema[key] = { "@type": key === 'author' ? "Person" : "Organization", "name": val };
+      } else {
+        currentSchema[key] = val;
+      }
+      renderForm();
+    }
+
+    // --- ИИ МАГИЯ ---
+    async function generateWithAI() {
+      const text = document.getElementById('ai-input').value;
+      if (!text) return;
+
+      const btn = document.getElementById('ai-btn');
+      const loader = document.getElementById('ai-loader');
+      btn.disabled = true; loader.style.display = 'inline-block';
+
+      try {
+        const aiResponse = await ipcRenderer.invoke('ai-request', text);
+        // Сливаем то, что было, с тем, что сгенерировал ИИ
+        currentSchema = { ...currentSchema, ...aiResponse };
+        currentSchema["@context"] = "https://schema.org"; // Защита от затирания
+        renderForm();
+      } catch (e) {
+        alert("Ошибка ИИ: " + e.message);
+      } finally {
+        btn.disabled = false; loader.style.display = 'none';
+      }
+    }
+
+    // --- ОБНОВЛЕНИЕ РЕЗУЛЬТАТА ---
+    function updateOutput() {
+      // Очищаем пустые строки перед выводом
+      const cleanSchema = JSON.parse(JSON.stringify(currentSchema));
+      for (const k in cleanSchema) {
+        if (cleanSchema[k] === "") delete cleanSchema[k];
+      }
+      document.getElementById('json-output').innerText = JSON.stringify(cleanSchema, null, 2);
+    }
+
+    function copyJSON() {
+      navigator.clipboard.writeText(document.getElementById('json-output').innerText);
+      alert('Синтаксис скопирован!');
+    }
+
+    // --- ИНИЦИАЛИЗАЦИЯ И ПРОЕКТЫ (База Данных) ---
+    async function loadProjects() {
+      projectsData = await ipcRenderer.invoke('get-projects');
+      const list = document.getElementById('project-list');
+      list.innerHTML = projectsData.map(p => `
+        <div class="project-item ${p.$loki === activeProjectId ? 'active' : ''}" onclick="selectProject(${p.$loki})">
+          📁 ${p.name}
+        </div>
+      `).join('');
+    }
+
+    async function addProject() {
+      const name = document.getElementById('new-project-name').value;
+      if (!name) return;
+      await ipcRenderer.invoke('add-project', { name, constants: {} });
+      document.getElementById('new-project-name').value = '';
+      loadProjects();
+    }
+
+    function selectProject(id) {
+      activeProjectId = id;
+      const p = projectsData.find(p => p.$loki === id);
+      if (p) {
+        document.getElementById('const-author').value = p.constants?.author || "";
+        document.getElementById('const-org').value = p.constants?.org || "";
+        document.getElementById('const-phone').value = p.constants?.phone || "";
+        document.getElementById('const-address').value = p.constants?.address || "";
+      }
+      loadProjects();
+    }
+
+    function saveConstants() {
+      if (!activeProjectId) return;
+      const constants = {
+        author: document.getElementById('const-author').value,
+        org: document.getElementById('const-org').value,
+        phone: document.getElementById('const-phone').value,
+        address: document.getElementById('const-address').value
+      };
+      ipcRenderer.invoke('save-constants', activeProjectId, constants);
+    }
+
+    async function openSettings() {
+      const key = prompt("Введи API ключ OpenRouter (начинается с sk-or-v1-):");
+      if (key) {
+        await ipcRenderer.invoke('save-settings', { api_key: key, default_model: "google/gemini-2.5-flash" });
+        alert("Сохранено!");
+      }
+    }
+
+    setTimeout(loadProjects, 500);
+    renderForm();
   </script>
 </body>
 </html>
