@@ -1,1 +1,181 @@
 
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Schematizer MVP</title>
+  <style>
+    body { margin: 0; display: flex; height: 100vh; font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f5f5f5; color: #333; }
+    .panel { padding: 20px; box-sizing: border-box; overflow-y: auto; }
+    #nav-panel { width: 20%; background-color: #e0e0e0; border-right: 1px solid #ccc; }
+    #constructor-panel { width: 50%; background-color: #ffffff; }
+    #result-panel { width: 30%; background-color: #2b2b2b; color: #a9b7c6; border-left: 1px solid #ccc; }
+    
+    h2 { font-size: 16px; margin-top: 0; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+    h3 { font-size: 14px; margin-bottom: 5px; color: #555; }
+    
+    .form-group { margin-bottom: 15px; }
+    label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; }
+    input[type="text"], select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    
+    /* Индикация обязательных полей для Google */
+    .required-field label { color: #d32f2f; }
+    .required-field input { border-left: 3px solid #d32f2f; }
+    
+    .json-output { font-family: 'Consolas', monospace; white-space: pre-wrap; font-size: 13px; outline: none; }
+    details { margin-top: 20px; border-top: 1px dashed #ccc; padding-top: 10px; }
+    summary { cursor: pointer; font-weight: bold; font-size: 13px; color: #0066cc; }
+  </style>
+</head>
+<body>
+
+  <div id="nav-panel" class="panel">
+    <h2>Проекты</h2>
+    <div id="project-list">
+      </div>
+    <hr>
+    <div class="form-group">
+      <input type="text" id="new-project-name" placeholder="Название сайта">
+      <button onclick="addProject()" style="width:100%; margin-top:5px; padding:8px;">Добавить проект</button>
+    </div>
+  </div>
+
+  <div id="constructor-panel" class="panel">
+    <h2>Конструктор разметки</h2>
+    <div class="form-group">
+      <label>Тип сущности (MVP):</label>
+      <select id="schema-type" onchange="renderForm()">
+        <option value="">-- Выберите тип --</option>
+        <option value="Article">Article</option>
+        <option value="Product">Product</option>
+        <option value="LocalBusiness">LocalBusiness</option>
+        <option value="FAQPage">FAQPage</option>
+      </select>
+    </div>
+
+    <div id="dynamic-form"></div>
+  </div>
+
+  <div id="result-panel" class="panel">
+    <h2 style="color: #fff; border-bottom-color: #555;">JSON-LD Результат</h2>
+    <div class="json-output" id="output"></div>
+  </div>
+
+  <script>
+    const { ipcRenderer } = require('electron');
+
+    // 1. Конфигурация метаданных (Справочник MVP)
+    const schemaConfig = {
+      "Article": {
+        "headline": { label: "Заголовок статьи", required: true },
+        "author": { label: "Автор (Имя)", required: true },
+        "image": { label: "URL изображения", required: true },
+        "datePublished": { label: "Дата публикации", required: false },
+        "description": { label: "Описание", required: false }
+      },
+      "Product": {
+        "name": { label: "Название товара", required: true },
+        "image": { label: "URL изображения", required: true },
+        "description": { label: "Описание", required: false },
+        "price": { label: "Цена", required: true },
+        "priceCurrency": { label: "Валюта (например, RUB)", required: true }
+      },
+      "LocalBusiness": {
+        "name": { label: "Название компании", required: true },
+        "image": { label: "URL логотипа", required: true },
+        "telephone": { label: "Телефон", required: false },
+        "address": { label: "Адрес", required: false }
+      }
+    };
+
+    let currentData = {};
+
+    // 2. Движок рендеринга формы
+    function renderForm() {
+      const type = document.getElementById('schema-type').value;
+      const formContainer = document.getElementById('dynamic-form');
+      formContainer.innerHTML = '';
+      currentData = {}; // Сбрасываем данные
+
+      if (!type || !schemaConfig[type]) {
+        generateJSONLD();
+        return;
+      }
+
+      const config = schemaConfig[type];
+      let requiredHTML = '<h3>Обязательные для Google</h3>';
+      let optionalHTML = '<details><summary>Дополнительные свойства</summary>';
+
+      for (const [key, prop] of Object.entries(config)) {
+        const inputHtml = `
+          <div class="form-group ${prop.required ? 'required-field' : ''}">
+            <label>${prop.label}</label>
+            <input type="text" id="input-${key}" data-key="${key}" oninput="updateData(this)">
+          </div>
+        `;
+        
+        if (prop.required) {
+          requiredHTML += inputHtml;
+        } else {
+          optionalHTML += inputHtml;
+        }
+      }
+      optionalHTML += '</details>';
+      
+      formContainer.innerHTML = requiredHTML + optionalHTML;
+      generateJSONLD();
+    }
+
+    // 3. Реактивное обновление данных
+    function updateData(element) {
+      const key = element.getAttribute('data-key');
+      currentData[key] = element.value;
+      generateJSONLD();
+    }
+
+    // 4. Генератор JSON-LD
+    function generateJSONLD() {
+      const type = document.getElementById('schema-type').value;
+      const output = document.getElementById('output');
+
+      if (!type) {
+        output.innerText = "// Выберите тип разметки";
+        return;
+      }
+
+      const jsonLD = {
+        "@context": "https://schema.org",
+        "@type": type,
+        ...currentData
+      };
+
+      // Очистка пустых полей
+      for (const key in jsonLD) {
+        if (jsonLD[key] === "" || jsonLD[key] === null) {
+          delete jsonLD[key];
+        }
+      }
+
+      output.innerText = JSON.stringify(jsonLD, null, 2);
+    }
+
+    // 5. Работа с локальной БД (LokiJS)
+    async function loadProjects() {
+      const projects = await ipcRenderer.invoke('get-projects');
+      const list = document.getElementById('project-list');
+      list.innerHTML = projects.map(p => `<p>📁 ${p.name}</p>`).join('');
+    }
+
+    async function addProject() {
+      const name = document.getElementById('new-project-name').value;
+      if (!name) return;
+      await ipcRenderer.invoke('add-project', { name: name });
+      document.getElementById('new-project-name').value = '';
+      loadProjects();
+    }
+
+    // Загрузка проектов при старте
+    setTimeout(loadProjects, 500); 
+  </script>
+</body>
+</html>
