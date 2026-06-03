@@ -1,0 +1,35 @@
+name: Build Desktop App
+
+on:
+  push:
+    tags:
+      - 'v*' # Запуск только при создании тега (например, v1.0.0-mvp)
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Получение исходного кода
+      uses: actions/checkout@v3
+
+    - name: Установка Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Установка зависимостей
+      # В ТЗ указан npm ci, но так как у нас нет консоли для генерации package-lock.json, используем npm install
+      run: npm install
+
+    - name: Компиляция приложения (electron-builder)
+      run: npm run build
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Загрузка готового релиза
+      uses: softprops/action-gh-release@v1
+      with:
+        files: dist/*.exe
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
