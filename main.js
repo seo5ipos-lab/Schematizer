@@ -4,9 +4,8 @@ const Loki = require('lokijs');
 
 let db, projects, settings;
 
-// 1. Инициализация базы данных
 function initDB() {
-  const dbPath = path.join(app.getPath('userData'), 'schematizer_v2.db');
+  const dbPath = path.join(app.getPath('userData'), 'schematizer_pro.db');
   db = new Loki(dbPath, {
     autoload: true,
     autoloadCallback: databaseInitialize,
@@ -22,11 +21,10 @@ function databaseInitialize() {
   settings = db.getCollection("global_settings");
   if (settings === null) {
     settings = db.addCollection("global_settings");
-    settings.insert({ api_key: "", default_model: "openrouter/auto" }); // Базовые настройки по ТЗ
+    settings.insert({ api_key: "", default_model: "openrouter/auto" });
   }
 }
 
-// 2. Создание окна
 function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 1400,
@@ -45,7 +43,7 @@ app.whenReady().then(() => {
   createWindow();
 });
 
-// 3. IPC Обработчики (База данных)
+// Настройки
 ipcMain.handle('get-settings', () => settings.data[0]);
 ipcMain.handle('save-settings', (event, newSettings) => {
   let current = settings.data[0];
@@ -55,25 +53,31 @@ ipcMain.handle('save-settings', (event, newSettings) => {
   return current;
 });
 
+// Проекты и Константы
 ipcMain.handle('get-projects', () => projects.find());
 ipcMain.handle('add-project', (event, project) => {
   projects.insert(project);
   return projects.find();
 });
-ipcMain.handle('save-project-preset', (event, projectId, presetData) => {
+ipcMain.handle('save-constants', (event, projectId, constants) => {
   let project = projects.get(projectId);
   if (project) {
-    project.template_organization = presetData;
+    project.constants = constants;
     projects.update(project);
   }
 });
 
-// 4. Изолированный поток ИИ (OpenRouter API) - Non-blocking UI
+// ИИ Генератор (Новый промпт)
 ipcMain.handle('ai-request', async (event, promptText) => {
   const config = settings.data[0];
   if (!config || !config.api_key) throw new Error("API ключ не настроен");
 
-  const systemPrompt = `Ты ассистент для определения типа Schema.org. Доступные типы (MVP): Article, Product, FAQPage, LocalBusiness, Organization, BreadcrumbList, Review. Запрещены текстовые пояснения. Отвечай СТРОГО в JSON формате: {"suggested_type": "Тип", "confidence": 0.99}.`;
+  // Заставляем ИИ собирать полную структуру
+  const systemPrompt = `Ты профессиональный генератор Schema.org JSON-LD. 
+Пользователь даст тебе текст или описание страницы. 
+Твоя задача: вернуть ВАЛИДНЫЙ JSON объект разметки (начиная с "@context" и "@type"). 
+Вытащи из текста максимум полезных данных (названия, цены, описания, авторов). Если данных для популярного свойства нет, создай ключ с пустым значением "". 
+Отвечай ТОЛЬКО чистым JSON без форматирования markdown и без текста.`;
 
   try {
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
