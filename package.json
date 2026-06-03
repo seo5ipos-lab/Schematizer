@@ -1,0 +1,23 @@
+{
+  "name": "schematizer",
+  "version": "1.0.0",
+  "description": "Schema.org Generator MVP",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --windows portable"
+  },
+  "build": {
+    "appId": "com.schematizer.app",
+    "win": {
+      "target": "portable"
+    }
+  },
+  "dependencies": {
+    "lokijs": "^1.5.12"
+  },
+  "devDependencies": {
+    "electron": "^29.0.0",
+    "electron-builder": "^24.9.1"
+  }
+}
