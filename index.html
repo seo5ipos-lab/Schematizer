@@ -10,119 +10,124 @@
       --text: #1e293b; --text-muted: #64748b;
       --code-bg: #0f172a; --code-text: #38bdf8;
     }
-    
     * { box-sizing: border-box; }
     body { margin: 0; display: flex; height: 100vh; font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
     
-    /* Сайдбар: Проекты и Пул свойств */
-    #sidebar { width: 300px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 10; }
+    #sidebar { width: 320px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 10; }
     .sidebar-section { padding: 15px; border-bottom: 1px solid var(--border); }
     h3 { margin: 0 0 10px 0; font-size: 13px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
     
     .project-item { padding: 8px 12px; margin-bottom: 5px; border-radius: 6px; cursor: pointer; font-size: 14px; border: 1px solid transparent; }
     .project-item.active { background: #eff6ff; border-color: #bfdbfe; color: var(--accent); font-weight: bold; }
     
-    input[type="text"], textarea { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; margin-bottom: 8px; outline: none; transition: border 0.2s; }
-    input[type="text"]:focus { border-color: var(--accent); }
+    input[type="text"], textarea, select { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; outline: none; transition: border 0.2s; }
+    input[type="text"]:focus, textarea:focus { border-color: var(--accent); }
     
     button { padding: 8px 16px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background 0.2s; }
     button:hover { background: var(--accent-hover); }
     .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
     .btn-outline:hover { background: #f1f5f9; }
 
-    /* Drag & Drop Пул */
-    .drag-pool { display: flex; flex-wrap: wrap; gap: 6px; max-height: 250px; overflow-y: auto; }
-    .drag-item { background: #f1f5f9; border: 1px dashed #94a3b8; padding: 6px 10px; border-radius: 4px; font-size: 12px; cursor: grab; user-select: none; transition: transform 0.1s; }
-    .drag-item:active { cursor: grabbing; transform: scale(0.95); }
+    /* Drag Pool */
+    .drag-pool { display: flex; flex-wrap: wrap; gap: 6px; overflow-y: auto; max-height: 300px; padding-bottom: 10px; }
+    .drag-item { background: #f1f5f9; border: 1px dashed #94a3b8; padding: 6px 10px; border-radius: 4px; font-size: 12px; cursor: grab; user-select: none; }
+    .drag-item.custom { border-color: #10b981; background: #f0fdf4; color: #047857; }
 
-    /* Центральная зона: ИИ и Конструктор */
+    /* Динамические константы */
+    .const-row { display: flex; gap: 5px; margin-bottom: 5px; }
+    .const-row input { padding: 6px; font-size: 12px; }
+
+    /* Центр */
     #main { flex: 1; display: flex; flex-direction: column; }
     .ai-bar { padding: 15px 20px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; gap: 10px; align-items: center; }
-    .ai-bar input { margin: 0; flex: 1; padding: 12px 15px; font-size: 14px; border-color: #a7f3d0; background: #f0fdf4; }
-    .ai-bar input:focus { border-color: #10b981; }
-    .btn-ai { background: #10b981; } .btn-ai:hover { background: #059669; }
-
+    .ai-bar input { flex: 1; background: #f0fdf4; border-color: #a7f3d0; }
+    
     #constructor-area { flex: 1; padding: 20px; overflow-y: auto; }
-    .drop-zone { min-height: 400px; background: var(--bg); border: 2px dashed #cbd5e1; border-radius: 12px; padding: 20px; transition: background 0.2s; }
+    .drop-zone { min-height: 400px; background: var(--bg); border: 2px dashed #cbd5e1; border-radius: 12px; padding: 20px; }
     .drop-zone.dragover { background: #e2e8f0; border-color: var(--accent); }
     
-    /* Динамические поля */
-    .field-row { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 5px; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    .field-header { display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; color: var(--accent); }
-    .field-actions { display: flex; gap: 5px; }
-    .btn-icon { background: transparent; color: var(--text-muted); border: none; padding: 2px 5px; font-size: 11px; cursor: pointer; border-radius: 4px; }
-    .btn-icon:hover { background: #e2e8f0; color: #ef4444; }
-    .btn-insert { background: #f1f5f9; color: var(--accent); border: 1px solid #e2e8f0; }
+    .field-row { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .field-header { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: bold; color: var(--accent); }
+    .field-tools { display: flex; gap: 10px; align-items: center; }
+    .const-select { padding: 4px 8px; font-size: 11px; border-radius: 4px; border: 1px solid #cbd5e1; background: #f8fafc; cursor: pointer; }
 
-    /* Правая панель: Код */
-    #code-panel { width: 35%; background: var(--code-bg); display: flex; flex-direction: column; border-left: 1px solid #1e293b; }
-    .code-header { padding: 15px; background: #0f172a; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center; }
+    /* Код */
+    #code-panel { width: 35%; background: var(--code-bg); display: flex; flex-direction: column; }
+    .code-header { padding: 15px; background: #0f172a; display: flex; justify-content: space-between; align-items: center; }
     pre { margin: 0; padding: 20px; color: var(--code-text); font-family: 'Consolas', monospace; font-size: 13px; overflow: auto; flex: 1; white-space: pre-wrap; }
 
-    /* Модалки и лоадеры */
-    .loader { border: 2px solid #f3f3f3; border-top: 2px solid white; border-radius: 50%; width: 14px; height: 14px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 5px; display: none; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    /* Модалка Настроек */
+    #settings-modal { display: none; position: fixed; top:0; left:0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; }
+    .modal-content { background: white; padding: 25px; border-radius: 8px; width: 500px; max-height: 80vh; overflow-y: auto; }
   </style>
 </head>
 <body>
 
+  <div id="settings-modal">
+    <div class="modal-content">
+      <h2 style="margin-top: 0;">Настройки и Свойства</h2>
+      <div style="margin-bottom: 15px;">
+        <label style="font-size: 12px; font-weight: bold;">OpenRouter API Key:</label>
+        <input type="text" id="set-api" style="margin-top: 5px;">
+      </div>
+      <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+      
+      <h3 style="color: var(--accent);">Мои кастомные свойства</h3>
+      <p style="font-size: 12px; color: var(--text-muted);">Добавь свойства, которых не хватает в базовом пуле. Они навсегда появятся в меню Drag & Drop.</p>
+      
+      <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+        <input type="text" id="new-custom-prop" placeholder="Например: openingHours">
+        <button onclick="addCustomProp()">Добавить</button>
+      </div>
+      <div id="custom-props-list" style="display: flex; flex-wrap: wrap; gap: 5px;"></div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px;">
+        <button class="btn-outline" onclick="document.getElementById('settings-modal').style.display='none'">Закрыть</button>
+        <button onclick="saveSettings()">Сохранить настройки</button>
+      </div>
+    </div>
+  </div>
+
   <div id="sidebar">
-    <div class="sidebar-section" style="background: #f8fafc; display: flex; justify-content: space-between; align-items: center;">
-      <h2 style="margin: 0; font-size: 16px; color: var(--accent);">Schematizer</h2>
-      <button class="btn-outline" style="padding: 4px 8px; font-size: 12px;" onclick="openSettings()">⚙️ API</button>
+    <div class="sidebar-section" style="display: flex; justify-content: space-between; align-items: center;">
+      <h2 style="margin: 0; font-size: 16px;">Schematizer</h2>
+      <button class="btn-outline" style="padding: 4px 8px; font-size: 12px;" onclick="openSettings()">⚙️ Настройки</button>
     </div>
 
     <div class="sidebar-section">
       <h3>Проекты</h3>
       <div id="project-list"></div>
       <div style="display: flex; gap: 5px; margin-top: 10px;">
-        <input type="text" id="new-project-name" placeholder="Новый проект" style="margin:0;">
+        <input type="text" id="new-project-name" placeholder="Новый проект">
         <button onclick="addProject()">+</button>
       </div>
     </div>
 
-    <div class="sidebar-section">
+    <div class="sidebar-section" id="constants-block" style="display: none;">
       <h3>Константы проекта</h3>
-      <input type="text" id="const-author" placeholder="Автор (Person)" onchange="saveConstants()">
-      <input type="text" id="const-org" placeholder="Организация (Название)" onchange="saveConstants()">
-      <input type="text" id="const-phone" placeholder="Телефон" onchange="saveConstants()">
-      <input type="text" id="const-address" placeholder="Адрес (Строка)" onchange="saveConstants()">
+      <div id="dynamic-constants"></div>
+      <div style="display: flex; gap: 5px; margin-top: 10px;">
+        <input type="text" id="new-const-key" placeholder="Имя (напр. Автор)">
+        <input type="text" id="new-const-val" placeholder="Значение">
+        <button onclick="addConstant()">+</button>
+      </div>
     </div>
 
     <div class="sidebar-section" style="flex: 1; overflow: hidden; display: flex; flex-direction: column;">
-      <h3>Пул свойств (Drag & Drop)</h3>
-      <div class="drag-pool">
-        <div class="drag-item" draggable="true" ondragstart="drag(event)" data-prop="@type">@type (Тип)</div>
-        <div class="drag-item" draggable="true" ondragstart="drag(event)" data-prop="name">name</div>
-        <div class="drag-item" draggable="true" ondragstart="drag(event)" data-prop="description">description</div>
-        <div class="drag-item" draggable="true" ondragstart="drag(event)" data-prop="image">image</div>
-        <div class="drag-item" draggable="true" ondragstart="drag(event)" data-prop="author">author</div>
-        <div class="drag-item" draggable="true" ondragstart="drag(event)" data-prop="publisher">publisher</div>
-        <div class="drag-item" draggable="true" ondragstart="drag(event)" data-prop="price">price</div>
-        <div class="drag-item" draggable="true" ondragstart="drag(event)" data-prop="priceCurrency">priceCurrency</div>
-        <div class="drag-item" draggable="true" ondragstart="drag(event)" data-prop="aggregateRating">aggregateRating</div>
-        <div class="drag-item" draggable="true" ondragstart="drag(event)" data-prop="telephone">telephone</div>
-        <div class="drag-item" draggable="true" ondragstart="drag(event)" data-prop="address">address</div>
-      </div>
+      <h3>Пул свойств</h3>
+      <div class="drag-pool" id="drag-pool"></div>
     </div>
   </div>
 
   <div id="main">
     <div class="ai-bar">
-      <span style="font-size: 18px;">✨</span>
-      <input type="text" id="ai-input" placeholder="Опиши контент (напр. 'Статья про ремонт авто от Ивана, дата сегодня')">
-      <button class="btn-ai" id="ai-btn" onclick="generateWithAI()">
-        <span class="loader" id="ai-loader"></span> Собрать через ИИ
-      </button>
-      <button class="btn-outline" onclick="clearForm()" title="Очистить всё">🗑️</button>
+      <span>✨</span>
+      <input type="text" id="ai-input" placeholder="Опиши контент...">
+      <button onclick="generateWithAI()">Собрать ИИ</button>
+      <button class="btn-outline" onclick="clearForm()">🗑️</button>
     </div>
-
     <div id="constructor-area">
-      <div class="drop-zone" id="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)">
-        <div id="empty-state" style="text-align: center; color: var(--text-muted); margin-top: 100px;">
-          <h3>Конструктор пуст</h3>
-          <p>Перетащи сюда блоки из пула свойств слева<br>или используй ИИ помощника сверху.</p>
-        </div>
+      <div class="drop-zone" id="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)">
         <div id="form-fields"></div>
       </div>
     </div>
@@ -130,196 +135,233 @@
 
   <div id="code-panel">
     <div class="code-header">
-      <span style="color: white; font-weight: bold; font-size: 14px;">JSON-LD Preview</span>
-      <button onclick="copyJSON()" style="background: #334155; padding: 6px 12px;">📋 Копировать</button>
+      <span style="color: white; font-weight: bold;">JSON-LD Preview</span>
+      <button onclick="copyJSON()" style="background: #334155;">📋 Скопировать</button>
     </div>
     <pre id="json-output"></pre>
   </div>
 
   <script>
     const { ipcRenderer } = require('electron');
-    
-    // Глобальный стейт текущей разметки
     let currentSchema = { "@context": "https://schema.org", "@type": "" };
     let activeProjectId = null;
     let projectsData = [];
+    let globalSettings = {};
 
-    // --- DRAG AND DROP ---
-    function allowDrop(ev) { ev.preventDefault(); }
-    function dragEnter(ev) { document.getElementById('drop-zone').classList.add('dragover'); }
-    function dragLeave(ev) { document.getElementById('drop-zone').classList.remove('dragover'); }
-    function drag(ev) { ev.dataTransfer.setData("text/plain", ev.target.getAttribute('data-prop')); }
-    
-    function drop(ev) {
-      ev.preventDefault();
-      document.getElementById('drop-zone').classList.remove('dragover');
-      const prop = ev.dataTransfer.getData("text/plain");
-      if (prop && currentSchema[prop] === undefined) {
-        currentSchema[prop] = ""; // Добавляем свойство в стейт
-        renderForm();
-      }
+    // Базовые свойства
+    const defaultProps = ['@type', 'name', 'description', 'image', 'url', 'author', 'publisher', 'price', 'priceCurrency', 'aggregateRating'];
+
+    // --- НАСТРОЙКИ И КАСТОМНЫЕ СВОЙСТВА ---
+    async function openSettings() {
+      globalSettings = await ipcRenderer.invoke('get-settings');
+      document.getElementById('set-api').value = globalSettings.api_key || "";
+      renderCustomPropsList();
+      document.getElementById('settings-modal').style.display = 'flex';
     }
 
-    // --- РЕНДЕР ИНТЕРФЕЙСА КОНСТРУКТОРА ---
-    function renderForm() {
-      const container = document.getElementById('form-fields');
-      const emptyState = document.getElementById('empty-state');
-      container.innerHTML = '';
+    async function saveSettings() {
+      globalSettings.api_key = document.getElementById('set-api').value;
+      await ipcRenderer.invoke('save-settings', globalSettings);
+      document.getElementById('settings-modal').style.display = 'none';
+      renderDragPool();
+    }
+
+    function addCustomProp() {
+      const val = document.getElementById('new-custom-prop').value.trim();
+      if (!val) return;
+      if (!globalSettings.custom_properties) globalSettings.custom_properties = [];
+      if (!globalSettings.custom_properties.includes(val)) {
+        globalSettings.custom_properties.push(val);
+        renderCustomPropsList();
+      }
+      document.getElementById('new-custom-prop').value = '';
+    }
+
+    function removeCustomProp(prop) {
+      globalSettings.custom_properties = globalSettings.custom_properties.filter(p => p !== prop);
+      renderCustomPropsList();
+    }
+
+    function renderCustomPropsList() {
+      const list = document.getElementById('custom-props-list');
+      const props = globalSettings.custom_properties || [];
+      list.innerHTML = props.map(p => `
+        <div style="background: #e2e8f0; padding: 4px 8px; border-radius: 4px; font-size: 12px; display: flex; align-items: center; gap: 5px;">
+          ${p} <span style="cursor:pointer; color:red;" onclick="removeCustomProp('${p}')">✕</span>
+        </div>
+      `).join('');
+    }
+
+    function renderDragPool() {
+      const pool = document.getElementById('drag-pool');
+      let html = defaultProps.map(p => `<div class="drag-item" draggable="true" ondragstart="drag(event)" data-prop="${p}">${p}</div>`).join('');
       
-      const keys = Object.keys(currentSchema).filter(k => k !== '@context');
+      const customProps = globalSettings.custom_properties || [];
+      html += customProps.map(p => `<div class="drag-item custom" draggable="true" ondragstart="drag(event)" data-prop="${p}">${p}</div>`).join('');
       
-      if (keys.length === 0) {
-        emptyState.style.display = 'block';
-      } else {
-        emptyState.style.display = 'none';
-        
-        keys.forEach(key => {
-          // Создаем визуальный блок для каждого свойства
-          const row = document.createElement('div');
-          row.className = 'field-row';
-          
-          let actionButtons = `
-            <button class="btn-icon btn-insert" onclick="insertConstant('${key}', 'const-author')" title="Вставить Автора">👤</button>
-            <button class="btn-icon btn-insert" onclick="insertConstant('${key}', 'const-org')" title="Вставить Организацию">🏢</button>
-            <button class="btn-icon" onclick="removeField('${key}')" title="Удалить свойство">✕</button>
-          `;
-
-          row.innerHTML = `
-            <div class="field-header">
-              <span>${key}</span>
-              <div class="field-actions">${actionButtons}</div>
-            </div>
-            <textarea rows="1" oninput="updateField('${key}', this.value)" placeholder="Введите значение или JSON...">${typeof currentSchema[key] === 'object' ? JSON.stringify(currentSchema[key], null, 2) : currentSchema[key]}</textarea>
-          `;
-          container.appendChild(row);
-        });
-      }
-      updateOutput();
+      pool.innerHTML = html;
     }
 
-    function updateField(key, value) {
-      // Пытаемся распарсить JSON, если юзер вставил вложенный объект
-      try {
-        currentSchema[key] = JSON.parse(value);
-      } catch (e) {
-        currentSchema[key] = value;
-      }
-      updateOutput();
-    }
-
-    function removeField(key) {
-      delete currentSchema[key];
-      renderForm();
-    }
-
-    function clearForm() {
-      currentSchema = { "@context": "https://schema.org" };
-      renderForm();
-    }
-
-    // --- РАБОТА С КОНСТАНТАМИ ПРОЕКТОВ ---
-    function insertConstant(key, constId) {
-      const val = document.getElementById(constId).value;
-      if (!val) { alert("Константа пуста! Заполни её слева."); return; }
-      
-      // Умная обертка: если вставляем автора в author, делаем объект Person
-      if (key === 'author' || key === 'publisher') {
-        currentSchema[key] = { "@type": key === 'author' ? "Person" : "Organization", "name": val };
-      } else {
-        currentSchema[key] = val;
-      }
-      renderForm();
-    }
-
-    // --- ИИ МАГИЯ ---
-    async function generateWithAI() {
-      const text = document.getElementById('ai-input').value;
-      if (!text) return;
-
-      const btn = document.getElementById('ai-btn');
-      const loader = document.getElementById('ai-loader');
-      btn.disabled = true; loader.style.display = 'inline-block';
-
-      try {
-        const aiResponse = await ipcRenderer.invoke('ai-request', text);
-        // Сливаем то, что было, с тем, что сгенерировал ИИ
-        currentSchema = { ...currentSchema, ...aiResponse };
-        currentSchema["@context"] = "https://schema.org"; // Защита от затирания
-        renderForm();
-      } catch (e) {
-        alert("Ошибка ИИ: " + e.message);
-      } finally {
-        btn.disabled = false; loader.style.display = 'none';
-      }
-    }
-
-    // --- ОБНОВЛЕНИЕ РЕЗУЛЬТАТА ---
-    function updateOutput() {
-      // Очищаем пустые строки перед выводом
-      const cleanSchema = JSON.parse(JSON.stringify(currentSchema));
-      for (const k in cleanSchema) {
-        if (cleanSchema[k] === "") delete cleanSchema[k];
-      }
-      document.getElementById('json-output').innerText = JSON.stringify(cleanSchema, null, 2);
-    }
-
-    function copyJSON() {
-      navigator.clipboard.writeText(document.getElementById('json-output').innerText);
-      alert('Синтаксис скопирован!');
-    }
-
-    // --- ИНИЦИАЛИЗАЦИЯ И ПРОЕКТЫ (База Данных) ---
-    async function loadProjects() {
+    // --- ПРОЕКТЫ И ДИНАМИЧЕСКИЕ КОНСТАНТЫ ---
+    async function loadData() {
+      globalSettings = await ipcRenderer.invoke('get-settings');
+      renderDragPool();
       projectsData = await ipcRenderer.invoke('get-projects');
       const list = document.getElementById('project-list');
       list.innerHTML = projectsData.map(p => `
-        <div class="project-item ${p.$loki === activeProjectId ? 'active' : ''}" onclick="selectProject(${p.$loki})">
-          📁 ${p.name}
-        </div>
+        <div class="project-item ${p.$loki === activeProjectId ? 'active' : ''}" onclick="selectProject(${p.$loki})">📁 ${p.name}</div>
       `).join('');
     }
 
     async function addProject() {
       const name = document.getElementById('new-project-name').value;
       if (!name) return;
-      await ipcRenderer.invoke('add-project', { name, constants: {} });
+      await ipcRenderer.invoke('add-project', { name, constants: [] });
       document.getElementById('new-project-name').value = '';
-      loadProjects();
+      loadData();
     }
 
     function selectProject(id) {
       activeProjectId = id;
-      const p = projectsData.find(p => p.$loki === id);
-      if (p) {
-        document.getElementById('const-author').value = p.constants?.author || "";
-        document.getElementById('const-org').value = p.constants?.org || "";
-        document.getElementById('const-phone').value = p.constants?.phone || "";
-        document.getElementById('const-address').value = p.constants?.address || "";
-      }
-      loadProjects();
+      document.getElementById('constants-block').style.display = 'block';
+      loadData();
+      renderConstants();
+      renderForm(); // Перерисовываем форму, чтобы обновить выпадающие списки констант
     }
 
-    function saveConstants() {
+    function renderConstants() {
       if (!activeProjectId) return;
-      const constants = {
-        author: document.getElementById('const-author').value,
-        org: document.getElementById('const-org').value,
-        phone: document.getElementById('const-phone').value,
-        address: document.getElementById('const-address').value
-      };
-      ipcRenderer.invoke('save-constants', activeProjectId, constants);
+      const p = projectsData.find(p => p.$loki === activeProjectId);
+      const list = document.getElementById('dynamic-constants');
+      const consts = p.constants || [];
+      
+      list.innerHTML = consts.map((c, idx) => `
+        <div class="const-row">
+          <input type="text" value="${c.key}" readonly style="width: 40%; background: #f1f5f9;">
+          <input type="text" value="${c.value}" onchange="updateConstantVal(${idx}, this.value)">
+          <button class="btn-outline" style="padding: 0 8px; color: red; border:none;" onclick="removeConstant(${idx})">✕</button>
+        </div>
+      `).join('');
     }
 
-    async function openSettings() {
-      const key = prompt("Введи API ключ OpenRouter (начинается с sk-or-v1-):");
-      if (key) {
-        await ipcRenderer.invoke('save-settings', { api_key: key, default_model: "google/gemini-2.5-flash" });
-        alert("Сохранено!");
+    function addConstant() {
+      const k = document.getElementById('new-const-key').value;
+      const v = document.getElementById('new-const-val').value;
+      if (!k || !v || !activeProjectId) return;
+      
+      const p = projectsData.find(p => p.$loki === activeProjectId);
+      if (!p.constants) p.constants = [];
+      p.constants.push({ key: k, value: v });
+      
+      ipcRenderer.invoke('save-constants', activeProjectId, p.constants);
+      document.getElementById('new-const-key').value = '';
+      document.getElementById('new-const-val').value = '';
+      loadData();
+      renderConstants();
+      renderForm();
+    }
+
+    function updateConstantVal(idx, newVal) {
+      const p = projectsData.find(p => p.$loki === activeProjectId);
+      p.constants[idx].value = newVal;
+      ipcRenderer.invoke('save-constants', activeProjectId, p.constants);
+    }
+
+    function removeConstant(idx) {
+      const p = projectsData.find(p => p.$loki === activeProjectId);
+      p.constants.splice(idx, 1);
+      ipcRenderer.invoke('save-constants', activeProjectId, p.constants);
+      renderConstants();
+      renderForm();
+    }
+
+    // --- DRAG & DROP и ФОРМА ---
+    function allowDrop(ev) { ev.preventDefault(); }
+    function drag(ev) { ev.dataTransfer.setData("text/plain", ev.target.getAttribute('data-prop')); }
+    function drop(ev) {
+      ev.preventDefault();
+      const prop = ev.dataTransfer.getData("text/plain");
+      if (prop && currentSchema[prop] === undefined) {
+        currentSchema[prop] = "";
+        renderForm();
       }
     }
 
-    setTimeout(loadProjects, 500);
-    renderForm();
+    function renderForm() {
+      const container = document.getElementById('form-fields');
+      container.innerHTML = '';
+      const keys = Object.keys(currentSchema).filter(k => k !== '@context');
+      
+      // Готовим опции для селекта констант
+      let constOptions = `<option value="">Вставить константу...</option>`;
+      if (activeProjectId) {
+        const p = projectsData.find(p => p.$loki === activeProjectId);
+        if (p && p.constants) {
+          p.constants.forEach(c => {
+            // Если значение похоже на JSON, экранируем его для атрибута
+            const safeVal = c.value.replace(/"/g, '&quot;');
+            constOptions += `<option value="${safeVal}">${c.key}</option>`;
+          });
+        }
+      }
+
+      keys.forEach(key => {
+        const row = document.createElement('div');
+        row.className = 'field-row';
+        row.innerHTML = `
+          <div class="field-header">
+            <span>${key}</span>
+            <div class="field-tools">
+              <select class="const-select" onchange="applyConstant('${key}', this.value); this.value='';">
+                ${constOptions}
+              </select>
+              <button class="btn-outline" style="padding: 2px 6px; font-size: 11px; border: none; color: #ef4444;" onclick="removeField('${key}')">Удалить</button>
+            </div>
+          </div>
+          <textarea rows="2" oninput="updateField('${key}', this.value)" placeholder="Значение или JSON...">${typeof currentSchema[key] === 'object' ? JSON.stringify(currentSchema[key], null, 2) : currentSchema[key]}</textarea>
+        `;
+        container.appendChild(row);
+      });
+      updateOutput();
+    }
+
+    function applyConstant(key, val) {
+      if (!val) return;
+      updateField(key, val);
+      renderForm(); // Перерисовываем, чтобы обновить textarea
+    }
+
+    function updateField(key, value) {
+      try { currentSchema[key] = JSON.parse(value); } 
+      catch (e) { currentSchema[key] = value; }
+      updateOutput();
+    }
+
+    function removeField(key) { delete currentSchema[key]; renderForm(); }
+    function clearForm() { currentSchema = { "@context": "https://schema.org" }; renderForm(); }
+
+    async function generateWithAI() {
+      const text = document.getElementById('ai-input').value;
+      if (!text) return;
+      try {
+        const res = await ipcRenderer.invoke('ai-request', text);
+        currentSchema = { ...currentSchema, ...res, "@context": "https://schema.org" };
+        renderForm();
+      } catch (e) { alert("Ошибка ИИ: " + e.message); }
+    }
+
+    function updateOutput() {
+      const clean = JSON.parse(JSON.stringify(currentSchema));
+      for (const k in clean) if (clean[k] === "") delete clean[k];
+      document.getElementById('json-output').innerText = JSON.stringify(clean, null, 2);
+    }
+
+    function copyJSON() {
+      navigator.clipboard.writeText(document.getElementById('json-output').innerText);
+      alert('Код скопирован!');
+    }
+
+    setTimeout(loadData, 500);
   </script>
 </body>
 </html>
