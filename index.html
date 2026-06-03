@@ -1,257 +1,265 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Schematizer MVP - Stage 3</title>
+  <title>Schematizer Pro</title>
   <style>
-    body { margin: 0; display: flex; height: 100vh; font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f5f5f5; color: #333; overflow: hidden; }
-    .panel { padding: 20px; box-sizing: border-box; overflow-y: auto; height: 100vh; }
-    #nav-panel { width: 20%; background-color: #e0e0e0; border-right: 1px solid #ccc; }
-    #constructor-panel { width: 50%; background-color: #ffffff; }
-    #result-panel { width: 30%; background-color: #2b2b2b; color: #a9b7c6; border-left: 1px solid #ccc; display: flex; flex-direction: column; }
+    :root {
+      --bg-color: #f3f4f6;
+      --sidebar-bg: #ffffff;
+      --panel-bg: #ffffff;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --border: #e5e7eb;
+      --code-bg: #1e1e1e;
+    }
     
-    h2 { font-size: 16px; margin-top: 0; border-bottom: 1px solid #ddd; padding-bottom: 10px; display: flex; justify-content: space-between; }
-    .form-group { margin-bottom: 12px; }
-    label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #555; }
-    input[type="text"], select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 13px; }
-    button { padding: 8px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 12px; }
-    .btn-primary { background: #0066cc; color: white; }
-    .btn-outline { background: transparent; border: 1px solid #0066cc; color: #0066cc; }
-    
-    /* ИИ Блок */
-    .ai-block { background: #f0fdf4; padding: 15px; border-radius: 6px; border: 1px solid #bbf7d0; margin-bottom: 20px; }
-    .loader { border: 3px solid #f3f3f3; border-top: 3px solid #166534; border-radius: 50%; width: 14px; height: 14px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 5px; display: none; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    
-    /* Настройки (Модалка) */
-    #settings-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
-    .modal-content { background: white; padding: 20px; border-radius: 8px; width: 400px; }
-    
-    .project-item { padding: 8px; background: #fff; border-radius: 4px; margin-bottom: 5px; cursor: pointer; border-left: 3px solid transparent; }
-    .project-item.active { border-left-color: #0066cc; background: #e6f2ff; }
-    
-    .json-output { font-family: monospace; white-space: pre-wrap; font-size: 13px; color: #a9b7c6; flex-grow: 1; overflow-y: auto; background: #1e1e1e; padding: 15px; border-radius: 4px; border: 1px solid #3c3f41; }
+    body {
+      margin: 0;
+      display: flex;
+      height: 100vh;
+      font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+    }
+
+    /* Современный сайдбар */
+    #sidebar {
+      width: 250px;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.02);
+      z-index: 10;
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 700;
+      font-size: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .menu-item {
+      padding: 12px 20px;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: all 0.2s;
+      font-size: 14px;
+    }
+
+    .menu-item:hover, .menu-item.active {
+      background: #f0fdf4;
+      border-left-color: #10b981;
+      color: #047857;
+      font-weight: 600;
+    }
+
+    /* Основная рабочая область */
+    #main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Верхняя панель управления (ИИ) */
+    .topbar {
+      padding: 15px 20px;
+      background: var(--panel-bg);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .ai-input-group {
+      flex: 1;
+      display: flex;
+      gap: 10px;
+    }
+
+    input[type="text"], select {
+      width: 100%;
+      padding: 10px 15px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent);
+    }
+
+    button {
+      padding: 10px 20px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    button:hover { background: var(--accent-hover); }
+
+    /* Двойная панель: Конструктор и Результат */
+    .workspace {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Зона Drag and Drop (Конструктор) */
+    .constructor-panel {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      gap: 20px;
+    }
+
+    .properties-list {
+      width: 200px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    .draggable-prop {
+      padding: 8px;
+      background: white;
+      border: 1px dashed #cbd5e1;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      cursor: grab;
+      font-size: 13px;
+    }
+
+    .drop-zone {
+      flex: 1;
+      background: white;
+      border: 2px dashed #94a3b8;
+      border-radius: 12px;
+      padding: 20px;
+      min-height: 300px;
+    }
+
+    /* Панель Кода */
+    .code-panel {
+      width: 40%;
+      background: var(--code-bg);
+      color: #d4d4d4;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .code-header {
+      padding: 10px 20px;
+      background: #2d2d2d;
+      border-bottom: 1px solid #404040;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #9cdcfe;
+    }
+
+    .btn-copy {
+      background: #4b5563;
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    .btn-copy:hover { background: #6b7280; }
+
+    pre {
+      margin: 0;
+      padding: 20px;
+      overflow: auto;
+      font-family: 'Consolas', monospace;
+      font-size: 13px;
+      flex: 1;
+    }
   </style>
 </head>
 <body>
 
-  <div id="settings-modal">
-    <div class="modal-content">
-      <h2 style="margin-bottom: 20px;">Глобальные настройки</h2>
-      <div class="form-group">
-        <label>OpenRouter API Key:</label>
-        <input type="text" id="setting-api-key" placeholder="sk-or-v1-...">
-      </div>
-      <div class="form-group">
-        <label>Модель по умолчанию:</label>
-        <input type="text" id="setting-model" value="google/gemini-2.5-flash">
-      </div>
-      <div style="display: flex; gap: 10px; margin-top: 20px;">
-        <button class="btn-primary" onclick="saveSettings()">Сохранить</button>
-        <button class="btn-outline" onclick="document.getElementById('settings-modal').style.display='none'">Отмена</button>
-      </div>
+  <div id="sidebar">
+    <div class="sidebar-header">
+      Schematizer
+      <span style="font-size: 12px; color: var(--text-muted); cursor: pointer;" title="Настройки">⚙️</span>
     </div>
+    <div style="padding: 15px 20px; font-size: 12px; color: var(--text-muted); text-transform: uppercase;">Проекты</div>
+    <div class="menu-item active">📁 Главный сайт</div>
+    <div class="menu-item">📁 Блог компании</div>
+    <div class="menu-item" style="color: var(--accent);">+ Добавить проект</div>
   </div>
 
-  <div id="nav-panel" class="panel">
-    <h2>Проекты <button class="btn-outline" onclick="openSettings()" style="padding: 2px 6px;">⚙️ Настройки</button></h2>
-    <div id="project-list"></div>
-    <div class="form-group" style="margin-top: 15px;">
-      <input type="text" id="new-project-name" placeholder="Название проекта">
-      <button class="btn-primary" onclick="addProject()" style="width:100%; margin-top:5px;">+ Добавить</button>
-    </div>
+  <div id="main-content">
     
-    <hr style="margin: 20px 0;">
-    <h3>Пресет выбранного проекта</h3>
-    <div class="form-group">
-      <label>Название организации:</label>
-      <input type="text" id="preset-org-name" onchange="saveActiveProjectPreset()">
-      <label style="margin-top:5px;">URL логотипа:</label>
-      <input type="text" id="preset-org-logo" onchange="saveActiveProjectPreset()">
-    </div>
-  </div>
-
-  <div id="constructor-panel" class="panel">
-    <h2>Конструктор разметки</h2>
-    
-    <div class="ai-block">
-      <label style="color: #166534;">✨ Авто-определение типа (OpenRouter)</label>
-      <input type="text" id="ai-input" placeholder="Опиши страницу. Например: 'Статья про ремонт авто'">
-      <button id="ai-btn" class="btn-primary" style="background: #166534; width: 100%; margin-top: 8px;" onclick="askAI()">
-        <span class="loader" id="ai-loader"></span> <span id="ai-btn-text">Спросить ИИ</span>
-      </button>
-    </div>
-
-    <div class="form-group" style="display: flex; gap: 10px; align-items: flex-end;">
-      <div style="flex-grow: 1;">
-        <label>Тип сущности Schema.org:</label>
-        <select id="schema-type" onchange="renderForm()">
-          <option value="">-- Выберите тип --</option>
-          <option value="Article">Article</option>
-          <option value="Product">Product</option>
-          <option value="Organization">Organization</option>
-        </select>
+    <div class="topbar">
+      <div class="ai-input-group">
+        <input type="text" placeholder="✨ Опиши страницу, и ИИ сам соберет все свойства...">
+        <button style="background: #10b981;">Сгенерировать</button>
       </div>
-      <button class="btn-outline" onclick="applyPreset()" title="Подставить данные организации">🏢 Вставить пресет</button>
+      <select style="width: 200px;">
+        <option>Article</option>
+        <option>Product</option>
+        <option>LocalBusiness</option>
+      </select>
     </div>
 
-    <div id="dynamic-form"></div>
-  </div>
+    <div class="workspace">
+      <div class="constructor-panel">
+        <div class="properties-list">
+          <div style="font-size: 12px; font-weight: bold; margin-bottom: 10px; color: var(--text-muted);">Доступные свойства</div>
+          <div class="draggable-prop" draggable="true">description</div>
+          <div class="draggable-prop" draggable="true">image</div>
+          <div class="draggable-prop" draggable="true">aggregateRating</div>
+          <div class="draggable-prop" draggable="true">offers</div>
+        </div>
+        
+        <div class="drop-zone">
+          <h3 style="margin-top: 0; color: #475569;">Конструктор свойств</h3>
+          <p style="color: var(--text-muted); font-size: 14px;">Перетащите свойства сюда или воспользуйтесь ИИ для автозаполнения.</p>
+          </div>
+      </div>
 
-  <div id="result-panel" class="panel">
-    <h2>JSON-LD</h2>
-    <div class="json-output" id="output"></div>
+      <div class="code-panel">
+        <div class="code-header">
+          <span>JSON-LD Output</span>
+          <button class="btn-copy" onclick="copyJSON()">📋 Копировать</button>
+        </div>
+        <pre id="json-output">{
+  "@context": "https://schema.org",
+  "@type": "Article"
+}</pre>
+      </div>
+    </div>
   </div>
 
   <script>
-    const { ipcRenderer } = require('electron');
-    let currentData = {};
-    let activeProjectId = null;
-    let projectsData = [];
-
-    // Конфиг MVP (Упрощен для примера)
-    const schemaConfig = {
-      "Article": { "headline": "Text", "author": "Text", "publisher_name": "Text" },
-      "Product": { "name": "Text", "brand_name": "Text", "price": "Text" },
-      "Organization": { "name": "Text", "logo": "Text" }
-    };
-
-    // --- Настройки ---
-    async function openSettings() {
-      const settings = await ipcRenderer.invoke('get-settings');
-      document.getElementById('setting-api-key').value = settings.api_key || "";
-      document.getElementById('setting-model').value = settings.default_model || "";
-      document.getElementById('settings-modal').style.display = 'flex';
-    }
-
-    async function saveSettings() {
-      await ipcRenderer.invoke('save-settings', {
-        api_key: document.getElementById('setting-api-key').value,
-        default_model: document.getElementById('setting-model').value
+    function copyJSON() {
+      const code = document.getElementById('json-output').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        alert('Успешно скопировано в буфер обмена!');
       });
-      document.getElementById('settings-modal').style.display = 'none';
-      alert('Настройки сохранены!');
     }
-
-    // --- Проекты и Пресеты ---
-    async function loadProjects() {
-      projectsData = await ipcRenderer.invoke('get-projects');
-      const list = document.getElementById('project-list');
-      list.innerHTML = projectsData.map(p => `
-        <div class="project-item ${p.$loki === activeProjectId ? 'active' : ''}" onclick="selectProject(${p.$loki})">
-          📁 ${p.name}
-        </div>
-      `).join('');
-    }
-
-    async function addProject() {
-      const name = document.getElementById('new-project-name').value;
-      if (!name) return;
-      await ipcRenderer.invoke('add-project', { name, template_organization: {} });
-      document.getElementById('new-project-name').value = '';
-      loadProjects();
-    }
-
-    function selectProject(id) {
-      activeProjectId = id;
-      loadProjects(); // Перерисовка для подсветки
-      const project = projectsData.find(p => p.$loki === id);
-      if (project && project.template_organization) {
-        document.getElementById('preset-org-name').value = project.template_organization.name || "";
-        document.getElementById('preset-org-logo').value = project.template_organization.logo || "";
-      }
-    }
-
-    function saveActiveProjectPreset() {
-      if (!activeProjectId) return;
-      const preset = {
-        name: document.getElementById('preset-org-name').value,
-        logo: document.getElementById('preset-org-logo').value
-      };
-      ipcRenderer.invoke('save-project-preset', activeProjectId, preset);
-    }
-
-    // --- ИИ Запрос ---
-    async function askAI() {
-      const text = document.getElementById('ai-input').value;
-      if (!text) return;
-      
-      const btn = document.getElementById('ai-btn');
-      const loader = document.getElementById('ai-loader');
-      const btnText = document.getElementById('ai-btn-text');
-      
-      btn.disabled = true;
-      loader.style.display = 'inline-block';
-      btnText.innerText = 'Думает...';
-
-      try {
-        const result = await ipcRenderer.invoke('ai-request', text);
-        if (result && result.suggested_type) {
-          if (confirm(`Нейросеть рекомендует тип: ${result.suggested_type} (Уверенность: ${result.confidence}). Применить?`)) {
-            document.getElementById('schema-type').value = result.suggested_type;
-            renderForm();
-          }
-        }
-      } catch (e) {
-        alert("Ошибка ИИ (проверь API ключ в настройках): " + e.message);
-      } finally {
-        btn.disabled = false;
-        loader.style.display = 'none';
-        btnText.innerText = 'Спросить ИИ';
-      }
-    }
-
-    // --- Рендер и JSON-LD ---
-    function renderForm() {
-      const type = document.getElementById('schema-type').value;
-      const container = document.getElementById('dynamic-form');
-      container.innerHTML = '';
-      currentData = {}; 
-
-      if (!type || !schemaConfig[type]) { updateOutput(); return; }
-
-      for (const [key, propType] of Object.entries(schemaConfig[type])) {
-        container.innerHTML += `
-          <div class="form-group">
-            <label>${key}</label>
-            <input type="text" id="input-${key}" data-key="${key}" oninput="updateData(this)">
-          </div>
-        `;
-      }
-      updateOutput();
-    }
-
-    function updateData(element) {
-      currentData[element.getAttribute('data-key')] = element.value;
-      updateOutput();
-    }
-
-    function applyPreset() {
-      if (!activeProjectId) { alert("Сначала выберите проект слева!"); return; }
-      const name = document.getElementById('preset-org-name').value;
-      
-      // Ищем инпуты, куда логично вставить данные организации
-      const targetInputs = ['publisher_name', 'brand_name', 'author', 'name'];
-      targetInputs.forEach(id => {
-        const el = document.getElementById(`input-${id}`);
-        if (el) { el.value = name; currentData[id] = name; }
-      });
-      updateOutput();
-    }
-
-    function updateOutput() {
-      const type = document.getElementById('schema-type').value;
-      const output = document.getElementById('output');
-      if (!type) { output.innerText = "// Пусто"; return; }
-      
-      const jsonLD = { "@context": "https://schema.org", "@type": type, ...currentData };
-      // Удаляем пустые ключи
-      Object.keys(jsonLD).forEach(k => (jsonLD[k] === "") && delete jsonLD[k]);
-      
-      output.innerText = JSON.stringify(jsonLD, null, 2);
-    }
-
-    setTimeout(loadProjects, 500);
   </script>
 </body>
 </html>
