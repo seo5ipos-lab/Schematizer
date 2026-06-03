@@ -1,22 +1,26 @@
 name: Build Desktop App
-on: [push] # Сборка при каждом сохранении кода
+on: [push]
 
 jobs:
   build:
     runs-on: windows-latest
-    permissions:
-      contents: write # Разрешение на публикацию релиза
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
-      with: { node-version: '18' }
-    - run: npm install
-    - run: npm run build
-    - name: Update Release
-      uses: softprops/action-gh-release@v1
+    - name: Получение исходного кода
+      uses: actions/checkout@v3
+
+    - name: Установка Node.js
+      uses: actions/setup-node@v3
       with:
-        files: dist/*.exe
-        tag_name: v1.0.0-mvp
-        append_body: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        node-version: '18'
+
+    - name: Установка зависимостей
+      run: npm install
+
+    - name: Компиляция приложения
+      run: npm run build
+
+    - name: Загрузка EXE как Артефакта
+      uses: actions/upload-artifact@v4
+      with:
+        name: Schematizer-Pro-EXE
+        path: dist/*.exe
